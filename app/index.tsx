@@ -4,16 +4,33 @@ import {
   StyleSheet,
   Text,
   View,
+  Keyboard,
 } from 'react-native';
+import { useRouter } from 'expo-router';
 import { useAuthContext } from '../contexts/AuthContext';
 import { useTheme } from '../hooks/useTheme';
+import { useUser } from '../hooks/useUser';
+import { SearchBar } from '../components/SearchBar';
+import { ErrorMessage } from '../components/ErrorMessage';
 import { COLORS } from '../constants/config';
 
 const SearchScreen = () => {
   const { colors } = useTheme();
-  const { isAuthenticated, isLoading, error, login } = useAuthContext();
+  const { isAuthenticated, isLoading: authLoading, error: authError, login, logout } = useAuthContext();
+  const { isLoading: searchLoading, error: searchError, searchUser, clearError } = useUser();
+  const router = useRouter();
 
-  if (isLoading) {
+  const handleSearch = async (loginQuery: string) => {
+    Keyboard.dismiss();
+    clearError();
+
+    const user = await searchUser(loginQuery);
+    if (user) {
+      router.push(`/profile/${user.login}`);
+    }
+  };
+
+  if (authLoading) {
     return (
       <View style={styles.container}>
         <ActivityIndicator size="large" color={COLORS.primary} />
@@ -34,7 +51,7 @@ const SearchScreen = () => {
           Connect with your 42 account to search students
         </Text>
 
-        {error && <Text style={styles.errorText}>{error}</Text>}
+        {authError && <ErrorMessage message={authError} />}
 
         <Pressable
           style={({ pressed }) => [
@@ -57,9 +74,26 @@ const SearchScreen = () => {
       <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
         Search for a 42 student
       </Text>
-      <Text style={[styles.placeholder, { color: colors.textSecondary }]}>
-        Search bar coming next...
-      </Text>
+
+      <SearchBar onSearch={handleSearch} isLoading={searchLoading} />
+
+      {searchError && (
+        <View style={styles.errorContainer}>
+          <ErrorMessage message={searchError} onRetry={clearError} />
+        </View>
+      )}
+
+      <Pressable
+        style={({ pressed }) => [
+          styles.logoutButton,
+          pressed && styles.logoutButtonPressed,
+        ]}
+        onPress={logout}
+      >
+        <Text style={[styles.logoutText, { color: colors.textSecondary }]}>
+          Logout
+        </Text>
+      </Pressable>
     </View>
   );
 };
@@ -85,16 +119,12 @@ const styles = StyleSheet.create({
     marginTop: 10,
     fontSize: 16,
   },
-  errorText: {
-    color: COLORS.error,
-    marginBottom: 20,
-    textAlign: 'center',
-  },
   loginButton: {
     backgroundColor: COLORS.primary,
     paddingHorizontal: 30,
     paddingVertical: 15,
     borderRadius: 8,
+    marginTop: 10,
   },
   loginButtonPressed: {
     opacity: 0.8,
@@ -104,9 +134,21 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
   },
-  placeholder: {
+  errorContainer: {
     marginTop: 20,
-    fontStyle: 'italic',
+    width: '100%',
+    maxWidth: 400,
+  },
+  logoutButton: {
+    position: 'absolute',
+    bottom: 40,
+    padding: 10,
+  },
+  logoutButtonPressed: {
+    opacity: 0.6,
+  },
+  logoutText: {
+    fontSize: 14,
   },
 });
 
