@@ -1,8 +1,9 @@
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import { AuthProvider } from '../contexts/AuthContext';
 import { useTheme } from '../hooks/useTheme';
 
-const RootLayout = () => {
+const StackLayout = () => {
   const { isDark, colors } = useTheme();
 
   return (
@@ -36,6 +37,14 @@ const RootLayout = () => {
         />
       </Stack>
     </>
+  );
+};
+
+const RootLayout = () => {
+  return (
+    <AuthProvider>
+      <StackLayout />
+    </AuthProvider>
   );
 };
 
