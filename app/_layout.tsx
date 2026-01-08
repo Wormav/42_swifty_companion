@@ -26,7 +26,7 @@ const StackLayout = () => {
         <Stack.Screen
           name="index"
           options={{
-            title: 'Swifty Companion',
+            headerShown: false,
           }}
         />
         <Stack.Screen

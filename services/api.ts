@@ -67,6 +67,21 @@ const api = {
 
     return this.request<User>(`/v2/users/${encodeURIComponent(sanitizedLogin)}`);
   },
+
+  /**
+   * Search users by login (autocomplete)
+   */
+  async searchUsers(query: string, limit: number = 3): Promise<User[]> {
+    const sanitizedQuery = query.trim().toLowerCase();
+
+    if (!sanitizedQuery || sanitizedQuery.length < 3) {
+      return [];
+    }
+
+    return this.request<User[]>(
+      `/v2/users?search[login]=${encodeURIComponent(sanitizedQuery)}&page[size]=${limit}`
+    );
+  },
 };
 
 export default api;

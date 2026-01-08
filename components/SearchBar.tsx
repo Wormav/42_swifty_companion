@@ -3,27 +3,23 @@ import {
   StyleSheet,
   TextInput,
   View,
-  Pressable,
-  Text,
   ActivityIndicator,
 } from 'react-native';
 import { COLORS } from '../constants/config';
 import { useTheme } from '../hooks/useTheme';
 
 interface SearchBarProps {
-  onSearch: (login: string) => void;
+  onSearch: (query: string) => void;
   isLoading?: boolean;
 }
 
 export const SearchBar = ({ onSearch, isLoading = false }: SearchBarProps) => {
-  const [login, setLogin] = useState('');
+  const [query, setQuery] = useState('');
   const { colors } = useTheme();
 
-  const handleSearch = () => {
-    const trimmed = login.trim();
-    if (trimmed) {
-      onSearch(trimmed);
-    }
+  const handleChange = (text: string) => {
+    setQuery(text);
+    onSearch(text);
   };
 
   return (
@@ -34,70 +30,44 @@ export const SearchBar = ({ onSearch, isLoading = false }: SearchBarProps) => {
           {
             backgroundColor: colors.card,
             color: colors.text,
-            borderColor: colors.textSecondary,
+            borderColor: COLORS.primary,
           },
         ]}
-        placeholder="Enter a 42 login..."
+        placeholder="Search a login..."
         placeholderTextColor={colors.textSecondary}
-        value={login}
-        onChangeText={setLogin}
-        onSubmitEditing={handleSearch}
+        value={query}
+        onChangeText={handleChange}
         autoCapitalize="none"
         autoCorrect={false}
-        returnKeyType="search"
-        editable={!isLoading}
       />
-      <Pressable
-        style={({ pressed }) => [
-          styles.button,
-          pressed && styles.buttonPressed,
-          isLoading && styles.buttonDisabled,
-        ]}
-        onPress={handleSearch}
-        disabled={isLoading || !login.trim()}
-      >
-        {isLoading ? (
-          <ActivityIndicator color="#FFFFFF" size="small" />
-        ) : (
-          <Text style={styles.buttonText}>Search</Text>
-        )}
-      </Pressable>
+      {isLoading && (
+        <View style={styles.loader}>
+          <ActivityIndicator color={COLORS.primary} size="small" />
+        </View>
+      )}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row',
-    gap: 10,
     width: '100%',
     maxWidth: 400,
+    position: 'relative',
   },
   input: {
-    flex: 1,
     height: 50,
     borderWidth: 1,
     borderRadius: 8,
     paddingHorizontal: 15,
+    paddingRight: 45,
     fontSize: 16,
   },
-  button: {
-    backgroundColor: COLORS.primary,
-    paddingHorizontal: 20,
-    borderRadius: 8,
+  loader: {
+    position: 'absolute',
+    right: 15,
+    top: 0,
+    bottom: 0,
     justifyContent: 'center',
-    alignItems: 'center',
-    minWidth: 80,
-  },
-  buttonPressed: {
-    opacity: 0.8,
-  },
-  buttonDisabled: {
-    opacity: 0.5,
-  },
-  buttonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '600',
   },
 });
